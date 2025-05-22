@@ -1,0 +1,60 @@
+run_dir: runs
+dtype: fp16
+enable_amp: true
+num_gpus: 8
+batch_size_per_gpu: 8
+total_batch_size: 64
+print_freq: 50
+test_freq: 1000
+seed: 3613
+compile: false
+num_max_save_models: 5
+test_distributed: true
+test_before_train: false
+use_gradient_ckpt: true
+find_unused_parameters: false
+use_ema: false
+ema_beta: 0.97
+ema_update_every: 100
+gradient_accumulation_steps: 1
+warm_steps: 1000
+total_steps: 300000
+max_epochs: 9999
+learning_rate: 1.0e-05
+min_lr: 5.0e-06
+weight_decay: 0.1
+beta1: 0.99
+beta2: 0.999
+lr_schedule: cosine
+max_grad_norm: 1
+vis_all: true
+experiment:
+  sam_checkpoint: sam_vit_l_0b3195.pth
+model:
+  vq_model:
+    codebook_size: 1024
+    token_size: 12
+    use_l2_norm: true
+    commitment_cost: 0.01
+    vit_enc_model_size: large
+    vit_dec_model_size: large
+    vit_enc_patch_size: 16
+    vit_dec_patch_size: 16
+    num_latent_tokens: 32
+    finetune_decoder: false
+    finetune_encoder: false
+    finetune_length: true
+    pretrained_tokenizer_weight: pretrained/maskgit-vqgan-imagenet-f16-256.bin
+dataset:
+  preprocessing:
+    resize_shorter_edge: 256
+    crop_size: 256
+    random_crop: true
+    random_flip: true
+losses:
+  reconstruction_weight: 1.0
+  bce_weight: 2.0
+  dice_weight: 0.5
+  quantizer_weight: 1.0
+  length_weight: 0.01
+world_size: 8
