@@ -8,7 +8,7 @@
 
 ## News
 - [2025.5.21] We released the ALToLLM-8B, available [here](https://huggingface.co/yayafengzi/ALToLLM-8B). 
-<!-- - [2025.5.22] We released the [paper](https://arxiv.org/abs/). -->
+- [2025.5.22] We released the [paper](https://arxiv.org/abs/2505.16495).
 
 ## Abstract
 While humans effortlessly draw visual objects and shapes by adaptively allocating attention based on their complexity, existing multimodal large language models (MLLMs) remain constrained by rigid token representations. Bridging this gap, we propose ALTo, an adaptive length tokenizer for autoregressive mask generation. To achieve this, a novel token length predictor is designed, along with a length regularization term and a differentiable token chunking strategy. We further build ALToLLM that seamlessly integrates ALTo into MLLM. Preferences on the trade-offs between mask quality and efficiency is implemented by group relative policy optimization (GRPO). Experiments demonstrate that ALToLLM achieves state-of-the-art performance with adaptive token cost on popular segmentation benchmarks.
@@ -31,7 +31,7 @@ export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 mkdir -p "runs"
 ```
 
-To train ALTo, download the SA1B dataset from [here](https://ai.meta.com/datasets/segment-anything/) and prepare the data in the same format as [example/sa1b.jsonl](example/sa1b.jsonl). You can either download our pretrained ALTo model and continue training from it, or start training from scratch using the [Titok](https://github.com/bytedance/1d-tokenizer) and [SAM](https://github.com/facebookresearch/segment-anything]) models.
+To train ALTo, download the SA1B dataset from [here](https://ai.meta.com/datasets/segment-anything/) and prepare the data in the same format as [example/sa1b.jsonl](example/sa1b.jsonl). You can either download our pretrained ALTo model and continue training from it, or start training from scratch using the [TiTok](https://github.com/bytedance/1d-tokenizer) and [SAM](https://github.com/facebookresearch/segment-anything]) models.
 
 For stage 1 training, run:
 ```bash
@@ -75,13 +75,13 @@ If you find this project useful in your research, please consider citing:
 @article{wang2025alto,
   title={ALTo: Adaptive-Length Tokenizer for Autoregressive Mask Generation},
   author={Wang, Lingfeng and Lin, Hualing and Chen, Senda and Wang, Tao and Cheng, Changxu and Zhong, Yangyang and Zheng, Dong and Zhao, Wuyue},
-  journal={arXiv preprint arXiv:},
+  journal={arXiv preprint arXiv:2505.16495},
   year={2025}
 }
 ```
 
 ## Acknowledgement
-This project is built with reference to [InternVL](https://github.com/OpenGVLab/InternVL), [Titok](https://github.com/bytedance/1d-tokenizer) and [HiMTok](https://github.com/yayafengzi/LMM-HiMTok).
+This project is built with reference to [InternVL](https://github.com/OpenGVLab/InternVL), [TiTok](https://github.com/bytedance/1d-tokenizer) and [HiMTok](https://github.com/yayafengzi/LMM-HiMTok).
 
 ## License
 ```
