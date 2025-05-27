@@ -133,12 +133,7 @@ class ALTo(BaseModel):
         # print("image_embedding.shape",image_embedding.shape)    
         decoded, lengths_to_keep = self.decoder(z_quantized,    # torch.Size([b, 12, 1, 32])
                                                 pixel_decoder=self.pixel_decoder,
-                                                image_embedding=image_embedding,    #torch.Size([b, 16, 64, 64])
-                                                random_length=self.config.model.use_random_length,
-                                                test_length=self.num_token_trained,
-                                                tune_decoder=self.tune_decoder,
-                                                use_vae=self.config.model.use_vae,
-                                                select_vae_info_inject=self.select_vae_info_inject)
+                                                image_embedding=image_embedding)
 
         masks_logits = (decoded.mean(1, keepdim=True) * 2 - 1) * 6
         decoded_image = masks_logits.sigmoid()
