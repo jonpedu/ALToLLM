@@ -45,7 +45,16 @@ class InternVLChatConfig(PretrainedConfig):
             llm_config = {'architectures': ['']}
             logger.info('llm_config is None. Initializing the LlamaConfig config with default values (`LlamaConfig`).')
 
+        print(f"Arquitetura encontrada: {llm_config['architectures'][0]}")
+
         self.vision_config = InternVisionConfig(**vision_config)
+
+        # Garantir que o campo 'architectures' está preenchido corretamente
+        if not llm_config.get('architectures') or not llm_config['architectures'][0]:
+            print("Arquitetura não encontrada. Substituindo por 'InternLM2ForCausalLM'.")
+            llm_config['architectures'] = ['InternLM2ForCausalLM']
+
+        # Verificar e configurar a arquitetura
         if llm_config['architectures'][0] == 'LlamaForCausalLM':
             self.llm_config = LlamaConfig(**llm_config)
         elif llm_config['architectures'][0] == 'InternLM2ForCausalLM':
@@ -55,7 +64,10 @@ class InternVLChatConfig(PretrainedConfig):
         elif llm_config['architectures'][0] == 'Qwen2ForCausalLM':
             self.llm_config = Qwen2Config(**llm_config)
         else:
-            raise ValueError('Unsupported architecture: {}'.format(llm_config['architectures'][0]))
+            print(f"Arquitetura {llm_config['architectures'][0]} não suportada. Substituindo por 'InternLM2ForCausalLM'.")
+            llm_config['architectures'][0] = 'InternLM2ForCausalLM'
+            self.llm_config = InternLM2Config(**llm_config)
+
         self.use_backbone_lora = use_backbone_lora
         self.use_llm_lora = use_llm_lora
         self.pad2square = pad2square

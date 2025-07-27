@@ -18,23 +18,20 @@ from transformers.modeling_outputs import (BaseModelOutputWithPast,
                                            CausalLMOutputWithPast,
                                            SequenceClassifierOutputWithPast)
 from transformers.modeling_utils import PreTrainedModel
+from transformers.generation import GenerationMixin
 from transformers.utils import (add_start_docstrings,
                                 add_start_docstrings_to_model_forward, logging,
                                 replace_return_docstrings)
+from transformers.generation.streamers import BaseStreamer
 
-try:
-    from transformers.generation.streamers import BaseStreamer
-except:  # noqa # pylint: disable=bare-except
-    BaseStreamer = None
+from internvl.model.internlm2.configuration_internlm2 import InternLM2Config
 
-from .configuration_internlm2 import InternLM2Config
+# Configuration for documentation
+_CONFIG_FOR_DOC = "InternLM2Config"
 
+# Get logger
 logger = logging.get_logger(__name__)
 
-_CONFIG_FOR_DOC = 'InternLM2Config'
-
-flash_attn_func, flash_attn_varlen_func = None, None
-pad_input, index_first_axis, unpad_input = None, None, None
 try:
     from flash_attn import flash_attn_func as _flash_attn_func
     from flash_attn import flash_attn_varlen_func as _flash_attn_varlen_func
@@ -887,7 +884,7 @@ class InternLM2Model(InternLM2PreTrainedModel):
 
         seq_length_with_past = seq_length
         past_key_values_length = 0
-        if past_key_values is not None:
+        if past_key_values is not None and len(past_key_values) > 0 and past_key_values[0] is not None and past_key_values[0][0] is not None:
             past_key_values_length = past_key_values[0][0].shape[2]
             seq_length_with_past = seq_length_with_past + past_key_values_length
 
@@ -986,7 +983,7 @@ class InternLM2Model(InternLM2PreTrainedModel):
 
 
 # Modified from transformers.model.llama.modeling_llama.LlamaForCausalLM
-class InternLM2ForCausalLM(InternLM2PreTrainedModel):
+class InternLM2ForCausalLM(InternLM2PreTrainedModel, GenerationMixin):
     _auto_class = 'AutoModelForCausalLM'
 
     _tied_weights_keys = ['output.weight']
@@ -1113,31 +1110,32 @@ class InternLM2ForCausalLM(InternLM2PreTrainedModel):
     def prepare_inputs_for_generation(
             self, input_ids, past_key_values=None, attention_mask=None, inputs_embeds=None, **kwargs
     ):
-        if past_key_values is not None:
+        if past_key_values is not None and len(past_key_values) > 0 and past_key_values[0] is not None:
             past_length = past_key_values[0][0].shape[2]
 
             # Some generation methods already pass only the last input ID
-            if input_ids.shape[1] > past_length:
+            if input_ids is not None and input_ids.shape[1] > past_length:
                 remove_prefix_length = past_length
             else:
                 # Default to old behavior: keep only final ID
-                remove_prefix_length = input_ids.shape[1] - 1
+                remove_prefix_length = input_ids.shape[1] - 1 if input_ids is not None else 0
 
-            input_ids = input_ids[:, remove_prefix_length:]
+            if input_ids is not None:
+                input_ids = input_ids[:, remove_prefix_length:]
 
         position_ids = kwargs.get('position_ids', None)
         if attention_mask is not None and position_ids is None:
             # create position_ids on the fly for batch generation
             position_ids = attention_mask.long().cumsum(-1) - 1
             position_ids.masked_fill_(attention_mask == 0, 1)
-            if past_key_values:
-                position_ids = position_ids[:, -input_ids.shape[1]:]
+            if past_key_values is not None and len(past_key_values) > 0:
+                position_ids = position_ids[:, -input_ids.shape[1]:] if input_ids is not None else position_ids
 
         # if `inputs_embeds` are passed, we only want to use them in the 1st generation step
-        if inputs_embeds is not None and past_key_values is None:
+        if inputs_embeds is not None and (past_key_values is None or len(past_key_values) == 0):
             model_inputs = {'inputs_embeds': inputs_embeds}
         else:
-            model_inputs = {'input_ids': input_ids}
+            model_inputs = {'input_ids': input_ids} if input_ids is not None else {}
 
         model_inputs.update(
             {
